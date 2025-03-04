@@ -1,12 +1,12 @@
-#include "../include/globals.h"
+#include "globals.h"
 #include "callback.h"
 
-#include <../vendor/SDL3/include/SDL3/SDL.h>
-#include <../vendor/SDL3/include/SDL3/SDL_main.h>
-#include <../vendor/dear_imgui/imgui.h>
-#include <../vendor/dear_imgui/misc/cpp/imgui_stdlib.h>
-#include <../vendor/dear_imgui/backends/imgui_impl_sdl3.h>
-#include <../vendor/dear_imgui/backends/imgui_impl_sdlrenderer3.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
+#include <imgui.h>
+#include <imgui_stdlib.h>
+#include <imgui_impl_sdl3.h>
+#include <imgui_impl_sdlrenderer3.h>
 
 #include <fstream>
 #include <filesystem>
