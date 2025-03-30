@@ -65,9 +65,6 @@ Outra coisa que quero avisar é que a acessibilidade do app é inexistente.
 Isso acontece porque a biblioteca de UI que o projeto usa foi feita apenas para criar ferramentas para desenvolvedores de jogos.
 Então, se você tem um colega que usa um leitor de tela ou algo parecido e não consegue usar o aplicativo, mil perdões.
 
-Última coisa: eu sou brasileiro, mas gostaria que escrevesse o código e os commits em inglês.
-Nada contra código em inglês, mas quero manter a consistência da base de código.
-
 ## Metas
 
 - [ ] Refatorar, reorganizar e documentar o código.
