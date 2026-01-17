@@ -7,3 +7,7 @@
 	path = vendor/dear_imgui
 	url = https://github.com/ocornut/imgui.git
 	branch = v1.91.8
+
+[submodule "vendor/uuid_v4"]
+	path = vendor/uuid_v4
+	url = https://github.com/crashoz/uuid_v4.git
