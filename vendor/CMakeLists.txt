@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 
 add_subdirectory(SDL3 EXCLUDE_FROM_ALL)
 add_subdirectory(uuid_v4 EXCLUDE_FROM_ALL)
+add_subdirectory(nlohmann_json EXCLUDE_FROM_ALL)
 
 project(DearImGui)
 

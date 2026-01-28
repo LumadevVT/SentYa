@@ -38,7 +38,8 @@ void SendFilesCallback(void *userdata, const char *const *fileList, int filter) 
     }
 
     for (int i = 0; fileList[i] != nullptr; i++) {
-        paths.push_back(fileList[i]);
+        paths.emplace_back(fileList[i]);
+
     }
 
     ProcessManager::SendFiles(paths);

@@ -11,3 +11,7 @@
 [submodule "vendor/uuid_v4"]
 	path = vendor/uuid_v4
 	url = https://github.com/crashoz/uuid_v4.git
+[submodule "vendor/nlohmann_json"]
+	path = vendor/nlohmann_json
+	url = https://github.com/nlohmann/json.git
+	branch = v3.12.0

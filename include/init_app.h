@@ -3,5 +3,4 @@
 #include "globals.h"
 
 void InitApp(Context &context);
-void QuitApp(Context &context);
-void QuitAtExit();
+void QuitApp(const Context &context);

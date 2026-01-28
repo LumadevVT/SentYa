@@ -1,99 +1,199 @@
 #include "process/manager.h"
 
+#include <fstream>
+#include <list>
+#include <utility>
+
+#include <nlohmann/json.hpp>
+#include <SDL3/SDL_process.h>
+
 #include "transfer/croc_cli.h"
 #include "transfer/interface_backend.h"
 
-#include <SDL3/SDL_process.h>
 
-namespace ProcessManager {
-    namespace {
-        Backend currentBackend = Backend::CROC_CLI;
-        IBackend *backendInterface = nullptr;
+#include "settings.h"
+#include "process/types.h"
+#include "utils/log.h"
 
-        std::vector<SendProcess> sendProcesses;
-        std::vector<ReceiveProcess> receiveProcesses;
+using json = nlohmann::json;
+
+namespace ProcessManager
+{
+    namespace
+    {
+        auto currentBackend = Backend::CROC_CLI;
+        IBackend* backendInterface = nullptr;
+
+        std::list<Process> activeTasks;
+
+        constexpr char TICKETS_DISK_FILE[] = "SentYa_Tickets.json";
+        std::fstream ticketsFile;
+        std::list<std::string> tasksToErase;
     }
 
-    std::vector<std::string> GetAvailableBackends() {
+    std::vector<Backend> GetAvailableBackends()
+    {
         return {
-            BackendToStr(Backend::CROC_CLI),
-            BackendToStr(Backend::SENDME_CLI),
+            Backend::CROC_CLI,
+            // Backend::SENDME_CLI
         };
     }
 
-    std::string BackendToStr(const Backend backend) {
-        switch (backend) {
-            case Backend::CROC_CLI:
-                return "Croc (CLI)";
-            case Backend::SENDME_CLI:
-            // return "Sendme (CLI)";
-            case Backend::UNSUPPORTED:
-                return "Unsupported";
-            default:
-                return "WTF IS THIS?";
+    const char* BackendToStr(const Backend backend)
+    {
+        switch (backend)
+        {
+        case Backend::CROC_CLI:
+            return "Croc (CLI)";
+        // case Backend::SENDME_CLI:
+        //     return "Sendme (CLI)";
+        default:
+            return "WTF IS THIS?";
         }
     }
 
-    void Init() {
+    Backend GetCurrentBackend()
+    {
+        return currentBackend;
+    }
+
+    const std::list<Process>& GetActiveProcesses()
+    {
+        return activeTasks;
+    }
+
+    void SaveTicketsToDisk(const std::list<Process>& tasks)
+    {
+        ticketsFile.open(Settings::GetConfigFolderPath() / TICKETS_DISK_FILE, std::ios::out);
+        json ticketsJson;
+        for (auto& task : tasks)
+        {
+            json archivesList(std::get<Process::SendData>(task.data).archivePaths);
+            ticketsJson[task.ticket] = archivesList;
+        }
+
+        ticketsFile << std::setw(4) << ticketsJson << std::endl;
+
+        ticketsFile.close();
+    }
+
+    void LoadTicketsFromDisk()
+    {
+        ticketsFile.open(Settings::GetConfigFolderPath() / TICKETS_DISK_FILE, std::ios::in);
+        if (!ticketsFile.is_open()) return;
+
+        json ticketsJson = json::parse(ticketsFile);
+        for (auto& [ticket, value] : ticketsJson.items())
+        {
+            auto paths = value.get<PathList>();
+            if (is_directory(paths.front()))
+                activeTasks.emplace_back(backendInterface->SendFolder(paths.front(), ticket));
+            else
+                activeTasks.emplace_back(backendInterface->SendFiles(paths, ticket));
+        }
+
+        ticketsFile.close();
+    }
+
+    void Init()
+    {
         ChangeBackend(Backend::CROC_CLI);
+        LoadTicketsFromDisk();
     }
 
-    void Quit() {
-        for (auto &proc: sendProcesses) {
-            SDL_DestroyProcess(proc.sdlProcess);
+    void Update()
+    {
+        if (backendInterface == nullptr) return;
+
+        for (auto& ticket : tasksToErase)
+        {
+            activeTasks.remove_if([ticket](const Process& proc)
+            {
+                return proc.ticket == ticket;
+            });
         }
 
-        for (auto &proc: receiveProcesses) {
+        tasksToErase.clear();
+
+        for (auto it = activeTasks.begin(); it != activeTasks.end();)
+        {
+            backendInterface->UpdateProcess(*it);
+
+            const bool finished = SDL_WaitProcess(it->sdlProcess, false, nullptr);
+
+            if (finished) backendInterface->OnProcessFinish(*it);
+            if (it->sdlProcess == nullptr) it = activeTasks.erase(it);
+            else ++it;
+        }
+    }
+
+    void Quit()
+    {
+        SaveTicketsToDisk(activeTasks);
+
+        for (auto& proc : activeTasks)
+        {
+            if (proc.sdlProcess == nullptr) continue;
+
+            SDL_KillProcess(proc.sdlProcess, true);
             SDL_DestroyProcess(proc.sdlProcess);
+            proc.sdlProcess = nullptr;
         }
 
-        sendProcesses.clear();
-        receiveProcesses.clear();
+        activeTasks.clear();
 
         delete backendInterface;
         backendInterface = nullptr;
     }
 
-    void ChangeBackend(const Backend backend) {
+    void ChangeBackend(const Backend backend)
+    {
         delete backendInterface;
+        backendInterface = nullptr;
 
-        switch (backend) {
-            case Backend::CROC_CLI:
-                currentBackend = Backend::CROC_CLI;
-                backendInterface = new CrocCLI;
-                break;
-            case Backend::SENDME_CLI: [[fallthrough]];
-            default:
-                currentBackend = Backend::UNSUPPORTED;
-                backendInterface = nullptr;
-                break;
+        switch (backend)
+        {
+        case Backend::CROC_CLI:
+            currentBackend = Backend::CROC_CLI;
+            backendInterface = new CrocCLI();
+            break;
+        // case Backend::SENDME_CLI:
+        //     currentBackend = Backend::SENDME_CLI;
+        default:
+            Log::Error("Backend not Registered");
+            break;
         }
     }
 
-    void SendFiles(const PathList &filePaths) {
+    void SendFiles(PathList filePaths)
+    {
         if (backendInterface == nullptr) return;
 
-        SendProcess proc = backendInterface->SendFiles(filePaths);
-        if (!proc.IsWorking()) return;
+        const Process newProc = backendInterface->SendFiles(std::move(filePaths));
 
-        sendProcesses.push_back(std::move(proc));
+        activeTasks.push_back(newProc);
     }
 
-    void SendFolder(const fs::path &folderPath) {
+    void SendFolder(fs::path folderPath)
+    {
         if (backendInterface == nullptr) return;
 
-        SendProcess proc = backendInterface->SendFolder(folderPath);
-        if (!proc.IsWorking()) return;
+        const Process newProc = backendInterface->SendFolder(std::move(folderPath));
 
-        sendProcesses.push_back(std::move(proc));
+        activeTasks.push_back(newProc);
     }
 
-    void ReceiveArchive(const std::string &ticket) {
+    void ReceiveArchive(const std::string& ticket)
+    {
         if (backendInterface == nullptr) return;
 
-        ReceiveProcess proc = backendInterface->ReceiveArchive(ticket);
-        if (!proc.IsWorking()) return;
+        const Process newProc = backendInterface->ReceiveArchive(ticket);
 
-        receiveProcesses.push_back(std::move(proc));
+        activeTasks.push_back(newProc);
+    }
+
+    void CloseProcess(const std::string& ticket)
+    {
+        tasksToErase.emplace_back(ticket);
     }
 }

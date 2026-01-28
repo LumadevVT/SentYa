@@ -1,7 +1,7 @@
 #include "gui/events.h"
 
 namespace GUI {
-    void SendEvent(GUIEvent event, void *data1, void *data2) {
+    void SendEvent(const GUIEvent event, void *data1, void *data2) {
         SDL_Event sdlEvent;
         SDL_zero(sdlEvent);
         sdlEvent.type = event;

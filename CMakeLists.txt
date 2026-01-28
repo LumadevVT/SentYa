@@ -26,7 +26,6 @@ add_executable(
         include/gui.h
         src/gui/tabs.cpp
         src/gui.cpp
-        include/transfer/croc_cli.h
         src/gui/events.cpp
         include/settings.h
         src/settings.cpp
@@ -34,27 +33,34 @@ add_executable(
         src/process/manager.cpp
 )
 
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
-target_include_directories(${PROJECT_NAME} PRIVATE "include")
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_sources(SentYa PRIVATE src/cli/croc_windows.cpp)
+else ()
+    target_sources(SentYa PRIVATE src/cli/croc_unix.cpp)
+endif ()
+
+target_compile_features(SentYa PRIVATE cxx_std_20)
+target_include_directories(SentYa PRIVATE "include")
 target_link_libraries(
-        ${PROJECT_NAME} PRIVATE
+        SentYa PRIVATE
         SDL3::SDL3
         DearImGui::SDL3
         uuid_v4
+        nlohmann_json
 )
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG=1)
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
+    target_compile_definitions(SentYa PRIVATE DEBUG=1)
 else ()
-    target_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG=0)
+    target_compile_definitions(SentYa PRIVATE DEBUG=0)
 endif ()
 
-if (WIN32)
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_custom_command(
-            TARGET ${PROJECT_NAME} POST_BUILD
+            TARGET SentYa POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy
-            $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}>
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+            $<TARGET_RUNTIME_DLLS:SentYa>
+            $<TARGET_FILE_DIR:SentYa>
             COMMAND_EXPAND_LISTS
     )
 endif ()
