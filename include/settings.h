@@ -4,9 +4,12 @@
 
 namespace fs = std::filesystem;
 
-namespace Settings {
-    void Init();
+namespace Settings
+{
+    bool Init();
+    void SaveToDisk();
 
-    fs::path GetDownloadFolderPath();
+    fs::path& GetDownloadFolderPath();
+    fs::path& GetConfigFolderPath();
     void SetDownloadFolderPath(fs::path newPath);
 }
