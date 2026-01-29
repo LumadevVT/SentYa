@@ -9,16 +9,13 @@ std::vector<std::string> CrocCLI::CreateSendCommand(const PathList& paths, const
 {
     std::vector<std::string> command;
 
-    command[0] = "croc.exe";
-    command[1] = "send";
-    command[2] = "--code";
-    command[3] = ticket;
+    command.emplace_back((binariesPath / "croc.exe").string());
+    command.emplace_back("send");
+    command.emplace_back("--code");
+    command.emplace_back(ticket);
 
-    for (size_t i = 0; i < paths.size(); ++i)
-    {
-        command[4 + i] = paths.at(i).string();
-    }
-    command[4 + paths.size()] = nullptr;
+    for (const auto& path : paths)
+        command.emplace_back(path.string());
 
     return command;
 }
@@ -27,13 +24,12 @@ std::vector<std::string> CrocCLI::CreateReceiveCommand(const std::string& ticket
 {
     std::vector<std::string> command;
 
-    command[0] = "croc.exe";
-    command[1] = "--yes";
-    command[2] = "--overwrite";
-    command[3] = "--out";
-    command[4] = Settings::GetDownloadFolderPath().string();
-    command[5] = ticket;
-    command[6] = nullptr;
+    command.emplace_back((binariesPath / "croc.exe").string());
+    command.emplace_back("--yes");
+    command.emplace_back("--overwrite");
+    command.emplace_back("--out");
+    command.emplace_back(Settings::GetDownloadFolderPath().string());
+    command.emplace_back(ticket);
 
     return command;
 }
