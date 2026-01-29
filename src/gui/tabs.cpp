@@ -14,8 +14,7 @@ namespace GUI
 {
     void RenderTutorialTab()
     {
-        static std::string introText = R"(Olá, este aqui é o SentYa!
-Este é um programa criado em cima do app de terminal chamado Sendme!
+        static std::string introText = R"(Olá, este aqui é o SentYa, o app de envio de arquivos baseado no sendme!
 
 Para enviar um arquivo, vá para a aba "Enviar" e aperte "Enviar arquivos" ou "Enviar pasta".
 Assim que processado o arquivo/pasta, clique em copiar o ticket e envie para o destinatário!
@@ -24,8 +23,10 @@ Lembre-se: você tem que deixar o ticket aberto para funcionar, se cancelar o ti
 Para receber o arquivo, copie o ticket que você recebeu do remetente e cole na aba "Receber".
 Depois disso, basta aguardar que seus arquivos serão instalados na sua pasta escolhida!
 
+Aviso: o app não consegue reconhecer direito arquivos e pastas com acento, tome cuidado com o nome das pastas e arquivos.
 
-Aviso: o app não consegue reconhecer direito arquivos e pastas com acento, tome cuidado com o nome das pastas e arquivos.)";
+O programa ainda está em desenvolvimento, então por favor mande uma mensagem no discord para @lumadevvt se tiver algum problema ou bug!
+)";
 
         ImGui::TextWrapped("%s", introText.c_str());
 
@@ -124,8 +125,10 @@ Aviso: o app não consegue reconhecer direito arquivos e pastas com acento, tome
             ImGui::TextWrapped("%s", task.ticket.c_str());
 
             const auto& data = std::get<Process::ReceiveData>(task.data);
-            ImGui::TextWrapped("Tempo decorrido: %u:%u", static_cast<Uint32>(data.timerSeconds) / 60,
-                               static_cast<Uint32>(data.timerSeconds));
+            ImGui::TextWrapped("Tempo decorrido: %02d:%02d",
+                               static_cast<Uint32>(data.timerSeconds) / 60,
+                               static_cast<Uint32>(data.timerSeconds)
+            );
             ImGui::Separator();
         }
     }
