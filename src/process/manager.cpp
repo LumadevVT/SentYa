@@ -84,8 +84,19 @@ namespace ProcessManager
         ticketsFile.open(Settings::GetConfigFolderPath() / TICKETS_DISK_FILE, std::ios::in);
         if (!ticketsFile.is_open()) return;
 
-        json ticketsJson = json::parse(ticketsFile);
-        for (auto& [ticket, value] : ticketsJson.items())
+        try
+        {
+            json ticketsJson = json::parse(ticketsFile);
+            for (auto& [ticket, value] : ticketsJson.items())
+            {
+                auto paths = value.get<PathList>();
+                if (is_directory(paths.front()))
+                    activeTasks.emplace_back(backendInterface->SendFolder(paths.front(), ticket));
+                else
+                    activeTasks.emplace_back(backendInterface->SendFiles(paths, ticket));
+            }
+        }
+        catch (std::exception& e)
         {
             Log::Error("Process Manager system has error loading file: "s + e.what());
         }
@@ -105,10 +116,14 @@ namespace ProcessManager
 
         for (auto& ticket : tasksToErase)
         {
-            activeTasks.remove_if([ticket](const Process& proc)
+            for (auto it = activeTasks.begin(); it != activeTasks.end(); ++it)
             {
-                return proc.ticket == ticket;
-            });
+                if (it->ticket == ticket)
+                {
+                    activeTasks.erase(it);
+                    break;
+                }
+            }
         }
 
         tasksToErase.clear();
