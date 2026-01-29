@@ -30,32 +30,32 @@ O programa ainda está em desenvolvimento, então por favor mande uma mensagem n
 
         ImGui::TextWrapped("%s", introText.c_str());
 
-        const auto backends = ProcessManager::GetAvailableBackends();
-        if (
-            ImGui::BeginCombo(
-                "Escolha o backend",
-                ProcessManager::BackendToStr(ProcessManager::GetCurrentBackend()))
-        )
-        {
-            static size_t item_selected_idx = 0;
-            for (size_t n = 0; n < backends.size(); n++)
-            {
-                const bool is_selected = item_selected_idx == n;
-                Log::Debug(
-                    std::string("Item selected: ") + ProcessManager::BackendToStr(backends.at(item_selected_idx)));
-                if (ImGui::Selectable(ProcessManager::BackendToStr(backends.at(n)), is_selected))
-                    item_selected_idx = n;
-
-                // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-                if (is_selected) ImGui::SetItemDefaultFocus();
-            }
-
-            if (backends.at(item_selected_idx) != ProcessManager::GetCurrentBackend())
-                ProcessManager::ChangeBackend(backends.at(item_selected_idx));
-
-
-            ImGui::EndCombo();
-        }
+        // const auto backends = ProcessManager::GetAvailableBackends();
+        // if (
+        //     ImGui::BeginCombo(
+        //         "Escolha o backend",
+        //         ProcessManager::BackendToStr(ProcessManager::GetCurrentBackend()))
+        // )
+        // {
+        //     static size_t item_selected_idx = 0;
+        //     for (size_t n = 0; n < backends.size(); n++)
+        //     {
+        //         const bool is_selected = item_selected_idx == n;
+        //         Log::Debug(
+        //             "Item selected: "s + ProcessManager::BackendToStr(backends.at(item_selected_idx)));
+        //         if (ImGui::Selectable(ProcessManager::BackendToStr(backends.at(n)), is_selected))
+        //             item_selected_idx = n;
+        //
+        //         // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+        //         if (is_selected) ImGui::SetItemDefaultFocus();
+        //     }
+        //
+        //     if (backends.at(item_selected_idx) != ProcessManager::GetCurrentBackend())
+        //         ProcessManager::ChangeBackend(backends.at(item_selected_idx));
+        //
+        //
+        //     ImGui::EndCombo();
+        // }
     }
 
     void RenderSendingTab()
