@@ -55,8 +55,6 @@ Process CrocCLI::SendFiles(const PathList filePaths, const std::string& oldTicke
     const SDL_PropertiesID props = SDL_CreateProperties();
     SDL_SetPointerProperty(props, SDL_PROP_PROCESS_CREATE_ARGS_POINTER, processCommandCStr);
 
-    SDL_SetStringProperty(props, SDL_PROP_PROCESS_CREATE_WORKING_DIRECTORY_STRING, binariesPath.c_str());
-
     SDL_Environment* env = SDL_CreateEnvironment(true);
     SDL_SetEnvironmentVariable(env, "CROC_SECRET", newProcess.ticket.c_str(), true);
     SDL_SetPointerProperty(props, SDL_PROP_PROCESS_CREATE_ENVIRONMENT_POINTER, env);
@@ -104,8 +102,6 @@ Process CrocCLI::SendFolder(fs::path folderPath, const std::string& oldTicket)
     const SDL_PropertiesID props = SDL_CreateProperties();
     SDL_SetPointerProperty(props, SDL_PROP_PROCESS_CREATE_ARGS_POINTER, processCommandCStr);
 
-    SDL_SetStringProperty(props, SDL_PROP_PROCESS_CREATE_WORKING_DIRECTORY_STRING, binariesPath.c_str());
-
     SDL_Environment* env = SDL_CreateEnvironment(true);
     SDL_SetEnvironmentVariable(env, "CROC_SECRET", newProcess.ticket.c_str(), true);
     SDL_SetPointerProperty(props, SDL_PROP_PROCESS_CREATE_ENVIRONMENT_POINTER, env);
@@ -143,8 +139,6 @@ Process CrocCLI::ReceiveArchive(const std::string& ticket)
 
     const SDL_PropertiesID props = SDL_CreateProperties();
     SDL_SetPointerProperty(props, SDL_PROP_PROCESS_CREATE_ARGS_POINTER, processCommandCStr);
-
-    SDL_SetStringProperty(props, SDL_PROP_PROCESS_CREATE_WORKING_DIRECTORY_STRING, binariesPath.c_str());
 
     SDL_Environment* env = SDL_CreateEnvironment(true);
     SDL_SetEnvironmentVariable(env, "CROC_SECRET", newProcess.ticket.c_str(), true);
