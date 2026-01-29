@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.25)
 
 add_subdirectory(SDL3 EXCLUDE_FROM_ALL)
 add_subdirectory(uuid_v4 EXCLUDE_FROM_ALL)
@@ -16,6 +16,7 @@ add_library(
         ${DEAR_IMGUI_PATH}/imgui_widgets.cpp
         ${DEAR_IMGUI_PATH}/misc/cpp/imgui_stdlib.cpp
 )
+target_compile_features(DearImGui PRIVATE cxx_std_11)
 target_include_directories(
         DearImGui PUBLIC
         ${DEAR_IMGUI_PATH}
@@ -23,11 +24,13 @@ target_include_directories(
         ${DEAR_IMGUI_PATH}/misc/cpp
 )
 
+
 add_library(
         DearImGuiSDL3 STATIC
         ${DEAR_IMGUI_PATH}/backends/imgui_impl_sdl3.cpp
         ${DEAR_IMGUI_PATH}/backends/imgui_impl_sdlrenderer3.cpp
         ${DEAR_IMGUI_PATH}/backends/imgui_impl_sdlgpu3.cpp
 )
-target_link_libraries(DearImGuiSDL3 PRIVATE SDL3::SDL3 PUBLIC DearImGui)
+target_compile_features(DearImGuiSDL3 PRIVATE cxx_std_11)
+target_link_libraries(DearImGuiSDL3 PUBLIC DearImGui PRIVATE SDL3::SDL3)
 add_library(DearImGui::SDL3 ALIAS DearImGuiSDL3)

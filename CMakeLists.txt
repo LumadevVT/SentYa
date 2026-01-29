@@ -1,13 +1,10 @@
 cmake_minimum_required(VERSION 3.25)
 
-set(CMAKE_COLOR_DIAGNOSTICS ON)
-set(CMAKE_COLOR_MAKEFILE ON)
+add_subdirectory(vendor EXCLUDE_FROM_ALL)
 
 project(SentYa)
 
 include(cmake/GetBinaries.cmake)
-
-add_subdirectory(vendor EXCLUDE_FROM_ALL)
 
 add_executable(
         SentYa
@@ -33,7 +30,7 @@ add_executable(
         src/process/manager.cpp
 )
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     target_sources(SentYa PRIVATE src/cli/croc_windows.cpp)
 else ()
     target_sources(SentYa PRIVATE src/cli/croc_unix.cpp)
@@ -43,16 +40,14 @@ target_compile_features(SentYa PRIVATE cxx_std_20)
 target_include_directories(SentYa PRIVATE "include")
 target_link_libraries(
         SentYa PRIVATE
-        SDL3::SDL3
         DearImGui::SDL3
+        SDL3::SDL3
         uuid_v4
         nlohmann_json
 )
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
     target_compile_definitions(SentYa PRIVATE DEBUG=1)
-else ()
-    target_compile_definitions(SentYa PRIVATE DEBUG=0)
 endif ()
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
