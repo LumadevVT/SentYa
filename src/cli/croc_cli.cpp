@@ -144,7 +144,7 @@ Process CrocCLI::ReceiveArchive(const std::string& ticket)
     SDL_SetEnvironmentVariable(env, "CROC_SECRET", newProcess.ticket.c_str(), true);
     SDL_SetPointerProperty(props, SDL_PROP_PROCESS_CREATE_ENVIRONMENT_POINTER, env);
     SDL_SetNumberProperty(props, SDL_PROP_PROCESS_CREATE_STDIN_NUMBER, SDL_PROCESS_STDIO_NULL);
-    SDL_SetNumberProperty(props, SDL_PROP_PROCESS_CREATE_STDOUT_NUMBER, SDL_PROCESS_STDIO_APP);
+    SDL_SetNumberProperty(props, SDL_PROP_PROCESS_CREATE_STDOUT_NUMBER, SDL_PROCESS_STDIO_INHERITED);
     newProcess.sdlProcess = SDL_CreateProcessWithProperties(props);
     if (newProcess.sdlProcess == nullptr)
     {
