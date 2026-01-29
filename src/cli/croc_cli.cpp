@@ -1,14 +1,16 @@
 #include "transfer/croc_cli.h"
 
-#include "globals.h"
 #include "utils/log.h"
 #include "uuid_v4.h"
+#include "utils/time.h"
 
+#include <string>
 #include <deque>
 #include <random>
 #include <SDL3/SDL_process.h>
 
-#include "utils/time.h"
+
+using namespace std::string_literals;
 
 UUIDv4::UUIDGenerator<std::mt19937_64> uuidGenerator;
 
@@ -24,7 +26,7 @@ Process CrocCLI::SendFolder(const fs::path folderPath)
 
 Process CrocCLI::SendFiles(const PathList filePaths, const std::string& oldTicket)
 {
-    std::string ticket = "SentYa_";
+    std::string ticket = "SentYa_"s;
     const UUIDv4::UUID uuid = uuidGenerator.getUUID();
     ticket.append(uuid.str());
     if (!oldTicket.empty())
@@ -63,7 +65,7 @@ Process CrocCLI::SendFiles(const PathList filePaths, const std::string& oldTicke
     newProcess.sdlProcess = SDL_CreateProcessWithProperties(props);
     if (newProcess.sdlProcess == nullptr)
     {
-        Log::Error("Could not create process! " + std::string(SDL_GetError()));
+        Log::Error("Could not create process! "s + SDL_GetError());
     }
 
     delete[] processCommandCStr;
@@ -72,7 +74,7 @@ Process CrocCLI::SendFiles(const PathList filePaths, const std::string& oldTicke
 
 Process CrocCLI::SendFolder(fs::path folderPath, const std::string& oldTicket)
 {
-    std::string ticket = "SentYa_";
+    std::string ticket = "SentYa_"s;
     const UUIDv4::UUID uuid = uuidGenerator.getUUID();
     ticket.append(uuid.str());
     if (!oldTicket.empty())
@@ -112,7 +114,7 @@ Process CrocCLI::SendFolder(fs::path folderPath, const std::string& oldTicket)
     newProcess.sdlProcess = SDL_CreateProcessWithProperties(props);
     if (newProcess.sdlProcess == nullptr)
     {
-        Log::Error("Could not create process! " + std::string(SDL_GetError()));
+        Log::Error("Could not create process! "s + SDL_GetError());
     }
 
     delete[] processCommandCStr;
@@ -152,7 +154,7 @@ Process CrocCLI::ReceiveArchive(const std::string& ticket)
     newProcess.sdlProcess = SDL_CreateProcessWithProperties(props);
     if (newProcess.sdlProcess == nullptr)
     {
-        Log::Error("Could not create process! " + std::string(SDL_GetError()));
+        Log::Error("Could not create process! "s + SDL_GetError());
     }
 
     delete[] processCommandCStr;

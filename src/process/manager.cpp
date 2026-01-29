@@ -17,6 +17,8 @@
 
 using json = nlohmann::json;
 
+using namespace std::string_literals;
+
 namespace ProcessManager
 {
     namespace
@@ -85,11 +87,7 @@ namespace ProcessManager
         json ticketsJson = json::parse(ticketsFile);
         for (auto& [ticket, value] : ticketsJson.items())
         {
-            auto paths = value.get<PathList>();
-            if (is_directory(paths.front()))
-                activeTasks.emplace_back(backendInterface->SendFolder(paths.front(), ticket));
-            else
-                activeTasks.emplace_back(backendInterface->SendFiles(paths, ticket));
+            Log::Error("Process Manager system has error loading file: "s + e.what());
         }
 
         ticketsFile.close();
