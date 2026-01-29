@@ -7,10 +7,8 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <imgui.h>
-#include <imgui_stdlib.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlrenderer3.h>
-#include <iostream>
 
 #include "gui.h"
 #include "settings.h"
@@ -18,7 +16,7 @@
 
 Context globalContext;
 
-bool HandleEvents();
+bool EventLoop();
 
 int main(int, char**)
 {
@@ -35,7 +33,7 @@ int main(int, char**)
 
     while (true)
     {
-        if (!HandleEvents()) break;
+        if (!EventLoop()) break;
 
         Time::Update();
         ProcessManager::Update();
@@ -82,64 +80,69 @@ int main(int, char**)
     return 0;
 }
 
-bool HandleEvents()
+void HandleUserEvents(SDL_Event& event)
+{
+    if (event.type == GUIEvents::SEND_FILES)
+    {
+        SDL_ShowOpenFileDialog(
+            SendFilesCallback,
+            nullptr,
+            globalContext.window,
+            nullptr, 0,
+            SDL_GetUserFolder(SDL_FOLDER_HOME),
+            true
+        );
+    }
+    else if (event.type == GUIEvents::SEND_FOLDER)
+    {
+        SDL_ShowOpenFolderDialog(
+            SendFoldersCallback,
+            nullptr,
+            globalContext.window,
+            SDL_GetUserFolder(SDL_FOLDER_HOME),
+            false
+        );
+    }
+    else if (event.type == GUIEvents::RECEIVE_ARCHIVE)
+    {
+        auto ticket = *static_cast<std::string*>(event.user.data1);
+        ProcessManager::ReceiveArchive(ticket);
+        delete static_cast<std::string*>(event.user.data1);
+        event.user.data1 = nullptr;
+    }
+    else if (event.type == GUIEvents::STOP_PROCESS)
+    {
+        const auto ticket = *static_cast<std::string*>(event.user.data1);
+        ProcessManager::CloseProcess(ticket);
+        delete static_cast<std::string*>(event.user.data1);
+        event.user.data1 = nullptr;
+    }
+    else if (event.type == GUIEvents::OPEN_DEFAULT_FOLDER)
+    {
+        std::string uri = "file:///" + Settings::GetDownloadFolderPath().generic_string();
+        SDL_OpenURL(uri.c_str());
+    }
+    else if (event.type == GUIEvents::CHANGE_DEFAULT_FOLDER)
+    {
+        SDL_ShowOpenFolderDialog(
+            ChangeDownloadFolderCallback,
+            nullptr,
+            globalContext.window,
+            Settings::GetDownloadFolderPath().string().c_str(),
+            false
+        );
+    }
+}
+
+bool EventLoop()
 {
     SDL_Event sdlEvent;
     while (SDL_PollEvent(&sdlEvent))
     {
         ImGui_ImplSDL3_ProcessEvent(&sdlEvent);
+        if (sdlEvent.type == SDL_EVENT_QUIT) return false;
 
-        if (sdlEvent.type == SDL_EVENT_QUIT)
-        {
-            return false;
-        }
-
-        if (sdlEvent.type == GUIEvents::SEND_FILES)
-        {
-            SDL_ShowOpenFileDialog(
-                SendFilesCallback,
-                nullptr,
-                globalContext.window,
-                nullptr, 0,
-                SDL_GetUserFolder(SDL_FOLDER_HOME),
-                true
-            );
-        }
-        else if (sdlEvent.type == GUIEvents::SEND_FOLDER)
-        {
-            SDL_ShowOpenFolderDialog(
-                SendFoldersCallback,
-                nullptr,
-                globalContext.window,
-                SDL_GetUserFolder(SDL_FOLDER_HOME),
-                false
-            );
-        }
-        else if (sdlEvent.type == GUIEvents::RECEIVE_ARCHIVE)
-        {
-            auto ticket = *static_cast<std::string*>(sdlEvent.user.data1);
-            ProcessManager::ReceiveArchive(ticket);
-            delete static_cast<std::string*>(sdlEvent.user.data1);
-            sdlEvent.user.data1 = nullptr;
-        }
-        else if (sdlEvent.type == GUIEvents::STOP_PROCESS)
-        {
-        }
-        else if (sdlEvent.type == GUIEvents::OPEN_DEFAULT_FOLDER)
-        {
-            std::string uri = "file:///" + Settings::GetDownloadFolderPath().generic_string();
-            SDL_OpenURL(uri.c_str());
-        }
-        else if (sdlEvent.type == GUIEvents::CHANGE_DEFAULT_FOLDER)
-        {
-            SDL_ShowOpenFolderDialog(
-                ChangeDownloadFolderCallback,
-                nullptr,
-                globalContext.window,
-                Settings::GetDownloadFolderPath().string().c_str(),
-                false
-            );
-        }
+        HandleUserEvents(sdlEvent);
     }
 
     return true;
