@@ -27,10 +27,9 @@ void InitApp(Context& context)
 
 void QuitApp(const Context& context)
 {
+    Settings::SaveToDisk();
     ProcessManager::Quit();
     Log::Quit();
-
-    Settings::SaveToDisk();
 
     ImGui_ImplSDLRenderer3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
