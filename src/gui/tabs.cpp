@@ -97,7 +97,7 @@ O programa ainda está em desenvolvimento, então por favor mande uma mensagem n
                 SDL_SetClipboardText(task.ticket.c_str());
             ImGui::SameLine();
             if (ImGui::Button(("Cancelar##" + task.ticket).c_str()))
-                ProcessManager::CloseProcess(task.ticket);
+                SendEvent(GUIEvents::STOP_PROCESS, new std::string(task.ticket));
 
             ImGui::Separator();
         }
