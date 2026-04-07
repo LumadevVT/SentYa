@@ -4,13 +4,10 @@ add_subdirectory(vendor EXCLUDE_FROM_ALL)
 
 project(SentYa)
 
-include(cmake/GetBinaries.cmake)
-
 add_executable(
         SentYa
         src/main.cpp
         src/callback.cpp
-        src/utils/log.cpp
         src/utils/time.cpp
         src/init_app.cpp
         include/context.h
@@ -28,6 +25,8 @@ add_executable(
         src/settings.cpp
         include/process/manager.h
         src/process/manager.cpp
+        include/p2p/p2p.h
+        src/p2p/p2p.cpp
 )
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
@@ -42,13 +41,11 @@ target_link_libraries(
         SentYa PRIVATE
         DearImGui::SDL3
         SDL3::SDL3
+        rats
         uuid_v4
         nlohmann_json
 )
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
-    target_compile_definitions(SentYa PRIVATE DEBUG=1)
-endif ()
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_custom_command(

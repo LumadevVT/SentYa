@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
 
 add_subdirectory(SDL3 EXCLUDE_FROM_ALL)
+set(RATS_BUILD_EXAMPLES OFF)
+set(RATS_BUILD_TESTS OFF)
+add_subdirectory(librats EXCLUDE_FROM_ALL)
 add_subdirectory(uuid_v4 EXCLUDE_FROM_ALL)
 add_subdirectory(nlohmann_json EXCLUDE_FROM_ALL)
 
